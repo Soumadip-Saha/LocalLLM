@@ -40,7 +40,8 @@ class embedding_model():
         # To-Do: Implement the model to get the embeddings
         texts = self._format_input(texts)
         batch_dict = self.tokenizer(
-            input_texts, max_length=self.max_length,
+            texts, 
+            max_length=self.max_length,
             padding=kwargs.get("padding", True),
             truncation=kwargs.get("truncation", True),
             return_tensors=kwargs.get("return_tensors", "pt")
