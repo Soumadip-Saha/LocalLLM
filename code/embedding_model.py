@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 from typing import List
+from torch import Tensor
 
 DEFAULT_TASK = """Given a query, retrieve relevant documents that answer the query."""
 
