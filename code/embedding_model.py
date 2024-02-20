@@ -29,15 +29,10 @@ class EmbeddingModel():
         self.task=task
         self.max_length=max_length-1
 
-    def _format_input(self, texts:List[str]):
-        # To-Do: Implement the model to format the input
+    def get_embedding(self, texts:List[str], **kwargs):
         for idx, text in enumerate(texts):
             texts[idx] = f"Instruct {self.task}\nQuery: {text}\n"
-        return texts
-
-    def get_embedding(self, texts:List[str], **kwargs):
-        # To-Do: Implement the model to get the embeddings
-        texts = self._format_input(texts)
+        
         batch_dict = self.tokenizer(
             texts, 
             max_length=self.max_length,
