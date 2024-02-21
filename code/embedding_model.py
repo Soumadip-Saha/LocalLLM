@@ -44,6 +44,3 @@ class EmbeddingModel():
         embeddings = last_token_pool(outputs.last_hidden_state, batch_dict['attention_mask'])
         embeddings = F.normalize(embeddings, p=2, dim=1)
         return embeddings.tolist()
-
-
-        
