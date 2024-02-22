@@ -1,0 +1,34 @@
+{
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "dynamic": "true",
+        "_source": {
+        "enabled": "true"
+        },
+        "properties": {
+            "content": {
+                "type": "text"
+            },
+            "embedding": {
+                "type": "dense_vector",
+                "dims": 4096
+            },
+            "metadata": {
+                "properties": {
+                    "source": {
+                        "type": "keyword"
+                    },
+                    "page_count": {
+                        "type": "integer"
+                    },
+                    "creation_date": {
+                        "type": "date"
+                    }
+                }
+            }
+        }
+    }
+}
