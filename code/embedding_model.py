@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
-from typing import List
+from typing import List, Dict
 from torch import Tensor
 
 DEFAULT_TASK = """Given a query, retrieve relevant documents that answer the query."""
@@ -28,13 +28,24 @@ class EmbeddingModel():
         self.model=AutoModel.from_pretrained(model_dir).to(device)
         self.task=task
         self.max_length=max_length-1
+    
+    def format_query(self, text:str):
+        return f"Instruct {self.task}\nQuery: {text}\n"
 
-    def get_embedding(self, texts:List[str], **kwargs):
-        for idx, text in enumerate(texts):
-            texts[idx] = f"Instruct {self.task}\nQuery: {text}\n"
+    def get_embedding(self, texts:List[Dict], **kwargs):
+        """
+        texts: List of dictionaries with the following structure:
+        [
+            {"query":True, "text": "What is the capital of India."},
+            {"query":False, "text": "India is a great country. The capital of India is New Delhi."}
+        ]
+        """
+        for idx, item in enumerate(texts):
+            if item["query"]:
+                item[idx]["text"] = f"Instruct {self.task}\nQuery: {text['text']}\n"
         
         batch_dict = self.tokenizer(
-            texts, 
+            [item["text"] for item in texts],
             max_length=self.max_length,
             padding=kwargs.get("padding", True),
             truncation=kwargs.get("truncation", True),
