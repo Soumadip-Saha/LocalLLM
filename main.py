@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from typing import List, Union
-from code import EmbeddingModel
+from code.embeddings import EmbeddingModel
 import os
 
 app = FastAPI()
@@ -15,8 +15,8 @@ class Documents(BaseModel):
 class Query(BaseModel):
     query_vector: List[float] = Field(..., example=[0.1, 0.2, 0.3])
 
-model = EmbeddingModel(model_dir="path_to_your_model")
-database = VectorDatabase(os.environ["ES_HOST"], os.environ["ES_INDEX"], os.environ["ES_USER"], os.environ["ES_PASSWORD"])
+# model = EmbeddingModel(model_dir="path_to_your_model")
+# database = VectorDatabase(os.environ["ES_HOST"], os.environ["ES_INDEX"], os.environ["ES_USER"], os.environ["ES_PASSWORD"])
 
 @app.post("/embed")
 async def create_embedding(item: Item):
@@ -25,11 +25,6 @@ async def create_embedding(item: Item):
     else:
         embedding = model.get_embedding([item.text])
     return {"embedding": embedding}
-
-@app.post("/insert")
-async def insert_document(document: Document):
-    db.insert(document=document.document)
-    return {"status": "success"}
 
 @app.post("/bulk_insert")
 async def bulk_insert_documents(documents: Documents):

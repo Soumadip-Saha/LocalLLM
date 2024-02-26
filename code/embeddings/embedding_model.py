@@ -5,6 +5,7 @@ from typing import List, Dict
 from torch import Tensor
 
 DEFAULT_TASK = """Given a query, retrieve relevant documents that answer the query."""
+DEFAULT_MODEL = "salesforce/SFR-Emebedding-Mistral"
 
 def download_model(url, model_dir="/content/Models", model_name="model.gguf"):
     # TO-DO: Implement github repository copy    
@@ -23,7 +24,10 @@ def last_token_pool(
     return last_hidden_states[torch.arange(batch_size, device=last_hidden_states.device), sequence_lengths]
 
 class EmbeddingModel():
-    def __init__(self, model_dir:str, max_length=4096, task:str=DEFAULT_TASK, device:str="cuda"):
+    def __init__(self, model_dir:str = None, max_length=4096, task:str=DEFAULT_TASK, device:str="cuda"):
+        if model_dir is None:
+            print("No model directory provided. Using Salesforce's Mistral model.")
+            model_dir = DEFAULT_MODEL
         self.tokenizer=AutoTokenizer.from_pretrained(model_dir)
         self.model=AutoModel.from_pretrained(model_dir).to(device)
         self.task=task
@@ -42,7 +46,7 @@ class EmbeddingModel():
         """
         for idx, item in enumerate(texts):
             if item["query"]:
-                item[idx]["text"] = f"Instruct {self.task}\nQuery: {text['text']}\n"
+                texts[idx]["text"] = f"Instruct {self.task}\nQuery: {item['text']}\n"
         
         batch_dict = self.tokenizer(
             [item["text"] for item in texts],
