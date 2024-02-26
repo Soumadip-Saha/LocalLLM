@@ -5,7 +5,7 @@ from typing import List, Dict
 from torch import Tensor
 
 DEFAULT_TASK = """Given a query, retrieve relevant documents that answer the query."""
-DEFAULT_MODEL = "salesforce/SFR-Emebedding-Mistral"
+DEFAULT_MODEL = "Salesforce/SFR-Embedding-Mistral"
 
 def download_model(url, model_dir="/content/Models", model_name="model.gguf"):
     # TO-DO: Implement github repository copy    
