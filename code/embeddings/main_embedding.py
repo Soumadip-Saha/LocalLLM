@@ -8,8 +8,12 @@ from pyngrok import ngrok
 import nest_asyncio
 from fastapi.middleware.cors import CORSMiddleware
 
+class TextItem(BaseModel):
+    query: int = Field(..., example=1)
+    text: str = Field(..., example="What is the capital of India.")
+
 class Item(BaseModel):
-    text: dict | list = Field(..., example={"query":True, "text": "What is the capital of India."})
+    items: List[TextItem]
 
 app = FastAPI()
 app.add_middleware(
@@ -25,10 +29,7 @@ model = EmbeddingModel(device=device)
 
 @app.post("/embed")
 async def create_embedding(item: Item):
-    if isinstance(item.text, list):
-        embeddings = model.get_embedding(item.text)
-    else:
-        embeddings = model.get_embedding([item.text])
+    embeddings = model.get_embedding(item.items)
     return {"embeddings": embeddings}
 
 
