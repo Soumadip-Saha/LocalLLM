@@ -28,7 +28,7 @@ app.add_middleware(
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = EmbeddingModel(device=device)
 
-os.environ["NGROK"] = "add"
+os.environ["NGROK"] = "2cvxEEs3DFfLJzGqUJCY6L3l2M6_6Pcq1C7D6WX3pkxGi4TzT"
 conf.get_default().auth_token = os.environ["NGROK"]
 
 @app.post("/embed")
