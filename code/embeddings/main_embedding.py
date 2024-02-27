@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from embedding_model import EmbeddingModel
-from typing import List, Union
+from typing import List, Union, Dict
 import torch
 import uvicorn
 from pyngrok import ngrok
@@ -9,7 +9,7 @@ import nest_asyncio
 from fastapi.middleware.cors import CORSMiddleware
 
 class Item(BaseModel):
-    text: Union[dict, List[dict]] = Field(..., example={"query":True, "text": "What is the capital of India."})
+    text: dict | list = Field(..., example={"query":True, "text": "What is the capital of India."})
 
 app = FastAPI()
 app.add_middleware(
