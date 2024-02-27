@@ -2,18 +2,19 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from embedding_model import EmbeddingModel
 from typing import List, Union, Dict
+import os
 import torch
 import uvicorn
-from pyngrok import ngrok
+from pyngrok import ngrok, conf
 import nest_asyncio
 from fastapi.middleware.cors import CORSMiddleware
 
-class TextItem(BaseModel):
-    query: int = Field(..., example=1)
-    text: str = Field(..., example="What is the capital of India.")
-
 class Item(BaseModel):
-    items: List[TextItem]
+    text: Union[Dict, List[Dict]] = Field(..., example={"query":True, "text": "What is the capital of India."})
+
+# class Item(BaseModel):
+#     query: int = Field(..., example=1)
+#     text: Union[str, List[str]] = Field(..., example="What is the capital of India?")
 
 app = FastAPI()
 app.add_middleware(
@@ -27,9 +28,15 @@ app.add_middleware(
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = EmbeddingModel(device=device)
 
+os.environ["NGROK"] = "add"
+conf.get_default().auth_token = os.environ["NGROK"]
+
 @app.post("/embed")
 async def create_embedding(item: Item):
-    embeddings = model.get_embedding(item.items)
+    if isinstance(item.text, list):
+        embeddings = model.get_embedding(item.text)
+    else:
+        embeddings = model.get_embedding([item.text])
     return {"embeddings": embeddings}
 
 
