@@ -51,7 +51,7 @@ async def generate_text(item: Item):
     )
     response = {"answer": ""}
     for message in stream:
-        response["answer"] += message
+        response["answer"] += message['choices'][0]['text']
     return response
 
 if __name__ == "__main__":

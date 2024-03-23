@@ -1,1 +1,1 @@
-from .llm_model import download_model, load_model
+from .llm_model import download_model, Mixtral

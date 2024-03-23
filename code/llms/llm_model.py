@@ -25,37 +25,18 @@ def download_model(url, model_dir="/content/Models", model_name="model.gguf"):
         if os.path.exists(model_path):
             os.remove(model_path)
     return model_path
-    
-def process_messages(messages, bos_token, eos_token):
-    result = ""
-    for index, message in enumerate(messages):
-        role = message['role']
-        content = message['content']
 
-        if (role == 'user') != (index % 2 == 0):
-            raise ValueError('Conversation roles must alternate user/assistant/user/assistant/...')
-
-        if role == 'user':
-            formatted_message = f"[INST] {content} [/INST]"
-        elif role == 'assistant':
-            formatted_message = f"{content}{eos_token}"
-        else:
-            raise ValueError('Only user and assistant roles are supported!')
-
-        result += formatted_message
-
-    return f"{bos_token}{result}"
-
-messages = [
-    {'role': 'user', 'content': 'Hello!'},
-    {'role': 'assistant', 'content': 'Hi there!'},
-    {'role': 'user', 'content': 'How are you?'},
-    {'role': 'assistant', 'content': 'I am fine, thank you!'},
-    {'role': 'user', 'content': 'What is the Capital of India?'}
-]
 
 class Mixtral:
+    # write description
     """
+    This is a LLM model wrapper for Mixtral model. It calls the hosted Mixtral model to generate responses.
+    model_url: str - URL of the Mixtral model
+    bos: str - Beginning of sentence token. Default is "<s>"
+    eos: str - End of sentence token. Default is "</s>"
+    instruct_start_token: str - Instruction start token. Default is "[INST]"
+    instruct_end_token: str - Instruction end token. Default is "[/INST]"
+    system_template: str - System template for the model
     """
     def __init__(
         self, 
@@ -72,15 +53,16 @@ class Mixtral:
         self.assistant_messages = []
 
     def get_response(self, prompt: str):
-        return prompt
+        self.user_messages.append(prompt)
+        prompt = self.format_prompt()
+        response = requests.post(self.model_url, json={"prompt": prompt})
+        return response.json()["answer"]
     
-    def format_prompt(self, user_messages: List[str], assistant_messages: List[str]):
+    def format_prompt(self):
         prompt = f"{self.bos}{self.instruct_start_token} {self.system_template}\n"
-        for idx in range(len(user_messages)+len(assistant_messages)):
+        for idx in range(len(self.user_messages)+len(self.assistant_messages)):
             if idx % 2 == 0:
                 prompt += f"User: {user_messages[idx//2]} {self.instruct_end_token}\n"
             else:
                 prompt += f"Assistant: {assistant_messages[idx//2]} {self.eos}\n"
-        self.user_messages += user_messages
-        self.assistant_messages += assistant_messages
         return prompt
