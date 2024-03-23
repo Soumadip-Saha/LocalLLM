@@ -12,9 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 class Item(BaseModel):
     text: Union[Dict, List[Dict]] = Field(..., example={"query":True, "text": "What is the capital of India."})
 
-# class Item(BaseModel):
-#     query: int = Field(..., example=1)
-#     text: Union[str, List[str]] = Field(..., example="What is the capital of India?")
 
 app = FastAPI()
 app.add_middleware(
@@ -31,7 +28,7 @@ model = EmbeddingModel(device=device)
 os.environ["NGROK"] = "2cvxEEs3DFfLJzGqUJCY6L3l2M6_6Pcq1C7D6WX3pkxGi4TzT"
 conf.get_default().auth_token = os.environ["NGROK"]
 
-@app.post("/embed")
+@app.post("/create_embeddings")
 async def create_embedding(item: Item):
     if isinstance(item.text, list):
         embeddings = model.get_embedding(item.text)

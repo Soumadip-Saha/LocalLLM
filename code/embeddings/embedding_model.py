@@ -29,7 +29,7 @@ class EmbeddingModel():
             print("No model directory provided. Using Salesforce's Mistral model.")
             model_dir = DEFAULT_MODEL
         self.tokenizer=AutoTokenizer.from_pretrained(model_dir)
-        self.model=AutoModel.from_pretrained(model_dir).to(device)
+        self.model=AutoModel.from_pretrained(model_dir, resume_download=True).to(device)
         self.task=task
         self.max_length=max_length-1
     

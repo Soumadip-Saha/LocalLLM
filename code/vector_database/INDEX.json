@@ -26,6 +26,9 @@
                     },
                     "creation_date": {
                         "type": "date"
+                    },
+                    "chunk_idx": {
+                        "type": "integer"
                     }
                 }
             }

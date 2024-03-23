@@ -3,7 +3,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from typing import List
 
-DEFAULT_INDEX_MAPPING = "code\INDEX.json"  
+DEFAULT_INDEX_MAPPING = "code\\vector_database\INDEX.json"
 
 class VectorDatabase:
     def __init__(self, host, index_name, user_name, password):
