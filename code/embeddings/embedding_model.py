@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
+from code.templates import BaseTemplate
 from typing import List, Dict
 from torch import Tensor
 
@@ -36,20 +37,20 @@ class EmbeddingModel():
     def format_query(self, text:str):
         return f"Instruct {self.task}\nQuery: {text}\n"
 
-    def get_embedding(self, texts:List[Dict], **kwargs):
+    def get_embedding(self, texts:List[str], **kwargs):
         """
         texts: List of dictionaries with the following structure:
         [
-            {"query":True, "text": "What is the capital of India."},
-            {"query":False, "text": "India is a great country. The capital of India is New Delhi."}
+            "What is the capital of India.",
+            "India is a great country. The capital of India is New Delhi."
         ]
         """
-        for idx, item in enumerate(texts):
-            if item["query"]:
-                texts[idx]["text"] = f"Instruct {self.task}\nQuery: {item['text']}\n"
+        # for idx, item in enumerate(texts):
+        #     if item["query"]:
+        #         texts[idx]["text"] = f"Instruct {self.task}\nQuery: {item['text']}\n"
         
         batch_dict = self.tokenizer(
-            [item["text"] for item in texts],
+            texts,
             max_length=self.max_length,
             padding=kwargs.get("padding", True),
             truncation=kwargs.get("truncation", True),
@@ -59,3 +60,14 @@ class EmbeddingModel():
         embeddings = last_token_pool(outputs.last_hidden_state, batch_dict['attention_mask'])
         embeddings = F.normalize(embeddings, p=2, dim=1)
         return embeddings.tolist()
+
+class MistralEmbeddings():
+    def __init__(self, model_url: str, template: BaseTemplate):
+        self.model_url = model_url
+        self.template = template
+    
+    def get_embeddings(self, texts: List[Dict[str, str]]):
+        prompts = [self.template.get_prompt(text) for text in texts]
+        embeddings = requests.post(self.model_url, json={"texts": prompts})
+        return embeddings
+        # raise NotImplementedError("This method is not implemented yet.") # TO-DO: Implement this method

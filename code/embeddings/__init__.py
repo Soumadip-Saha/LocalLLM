@@ -1,1 +1,1 @@
-from .embedding_model import EmbeddingModel
+from .embedding_model import EmbeddingModel, MistralEmbeddings
