@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from embedding_model import EmbeddingModel
+from .embedding_model import EmbeddingModel
 from typing import List, Union, Dict
 import os
 import torch
@@ -10,7 +10,7 @@ import nest_asyncio
 from fastapi.middleware.cors import CORSMiddleware
 
 class Item(BaseModel):
-    text: Union[Dict, List[Dict]] = Field(..., example={"query":True, "text": "What is the capital of India."})
+    text: Union[str, List[str]] = Field(..., example=["What is the capital of India.", "India is a great country. The capital of India is New Delhi."])
 
 
 app = FastAPI()
