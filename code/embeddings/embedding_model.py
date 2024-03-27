@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
-from code import BaseTemplate
+from code.templates.template import BaseTemplate
 from typing import List, Dict
 from torch import Tensor
 
