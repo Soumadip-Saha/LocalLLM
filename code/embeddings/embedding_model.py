@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModel
 from ..templates import BaseTemplate
 from typing import List, Dict
 from torch import Tensor
+import requests
 
 DEFAULT_TASK = """Given a query, retrieve relevant documents that answer the query."""
 DEFAULT_MODEL = "Salesforce/SFR-Embedding-Mistral"
@@ -25,17 +26,13 @@ def last_token_pool(
     return last_hidden_states[torch.arange(batch_size, device=last_hidden_states.device), sequence_lengths]
 
 class EmbeddingModel():
-    def __init__(self, model_dir:str = None, max_length=4096, task:str=DEFAULT_TASK, device:str="cuda"):
+    def __init__(self, model_dir:str = None, max_length=4096, device:str="cuda"):
         if model_dir is None:
             print("No model directory provided. Using Salesforce's Mistral model.")
             model_dir = DEFAULT_MODEL
         self.tokenizer=AutoTokenizer.from_pretrained(model_dir)
         self.model=AutoModel.from_pretrained(model_dir, resume_download=True).to(device)
-        self.task=task
         self.max_length=max_length-1
-    
-    def format_query(self, text:str):
-        return f"Instruct {self.task}\nQuery: {text}\n"
 
     def get_embedding(self, texts:List[str], **kwargs):
         """
@@ -45,9 +42,6 @@ class EmbeddingModel():
             "India is a great country. The capital of India is New Delhi."
         ]
         """
-        # for idx, item in enumerate(texts):
-        #     if item["query"]:
-        #         texts[idx]["text"] = f"Instruct {self.task}\nQuery: {item['text']}\n"
         
         batch_dict = self.tokenizer(
             texts,
@@ -68,6 +62,5 @@ class MistralEmbeddings():
     
     def get_embeddings(self, texts: List[Dict[str, str]]):
         prompts = [self.template.get_prompt(text) for text in texts]
-        embeddings = requests.post(self.model_url, json={"texts": prompts})
-        return embeddings
-        # raise NotImplementedError("This method is not implemented yet.") # TO-DO: Implement this method
+        embeddings = requests.post(self.model_url, json={"text": prompts})
+        return embeddings.json()

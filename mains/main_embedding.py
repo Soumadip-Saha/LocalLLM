@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from .embedding_model import EmbeddingModel
+import code
 from typing import List, Union, Dict
 import os
 import torch
@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model = EmbeddingModel(device=device)
+model = code.embeddings.EmbeddingModel(device=device)
 
 os.environ["NGROK"] = "2cvxEEs3DFfLJzGqUJCY6L3l2M6_6Pcq1C7D6WX3pkxGi4TzT"
 conf.get_default().auth_token = os.environ["NGROK"]

@@ -10,15 +10,18 @@ import requests
 class Retriever:
     def __init__(self, vector_database: VectorDatabase, embedding_model: MistralEmbeddings):
         self.vector_db = vector_database
-        self.embeddings_model = embeddings_model
+        self.embedding_model = embedding_model
         
     def get_docs(self, query: str, top_k=5):
-        query_embedding = self.embeddings_model.get_embeddings([{"question": query}])
+        query_embedding = self.embedding_model.get_embeddings([{"question": query}])["embeddings"][0]
         docs = self.vector_db.similarity_search(query_embedding, top_k)
         return docs
 
 class RAGChatAgent:
-    def __init__(self, retriever: Retriever, llm_model: Mixtral, question_generator: BaseTemplate, chat_template: BaseTemplate):
+    def __init__(
+        self, retriever: Retriever, llm_model: Mixtral,
+        question_generator: BaseTemplate, chat_template: BaseTemplate
+    ):
         self.retriever = retriever
         self.llm = llm_model
         self.messages = []
