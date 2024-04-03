@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 from ..templates import BaseTemplate
-from typing import List, Dict
+from typing import List, Dict, Union
 from torch import Tensor
 import requests
 
@@ -56,11 +56,9 @@ class EmbeddingModel():
         return embeddings.tolist()
 
 class MistralEmbeddings():
-    def __init__(self, model_url: str, template: BaseTemplate):
+    def __init__(self, model_url: str):
         self.model_url = model_url
-        self.template = template
     
-    def get_embeddings(self, texts: List[Dict[str, str]]):
-        prompts = [self.template.get_prompt(text) for text in texts]
+    def get_embeddings(self, texts: Union[str, List[str]]):
         embeddings = requests.post(self.model_url, json={"text": prompts})
         return embeddings.json()

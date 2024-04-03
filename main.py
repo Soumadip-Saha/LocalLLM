@@ -123,8 +123,7 @@ db = code.vector_database.VectorDatabase(
 )
 
 query_embedder = code.embeddings.MistralEmbeddings(
-    model_url="model-url-goes-here",
-    template=code.templates.BaseTemplate("Instruct {code.embeddings.DEFAULT_TASK}\nQuery: {query}", ["query"])
+    model_url="model-url-goes-here"
 )
 
 retriever = code.agents.Retriever(
