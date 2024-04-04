@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
-from code.templates import BaseTemplate
 from typing import List, Dict, Union
 from torch import Tensor
 import requests
