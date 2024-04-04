@@ -5,20 +5,11 @@ from code.llms import Mixtral
 from code.embeddings import MistralEmbeddings
 from code.templates import BaseTemplate
 import requests
-
+from typing import List, Dict
+from code.utils import Retriever
 
 # TODO: Complete the implementation of the Retriever class
-class Retriever:
-    def __init__(self, vector_database: VectorDatabase, embedding_model: MistralEmbeddings, query_template: BaseTemplate):
-        self.vector_db = vector_database
-        self.embedding_model = embedding_model
-        self.query_template = query_template
-        
-    def get_docs(self, query: str, top_k=5):
-        query = self.query_template.get_prompt({"query": query})
-        query_embedding = self.embedding_model.get_embeddings(query)["embeddings"][0]
-        docs = self.vector_db.similarity_search(query_embedding, top_k)
-        return docs
+
 
 class RAGChatAgent:
     def __init__(
@@ -36,7 +27,7 @@ class RAGChatAgent:
         stand_alone_query = self.llm.get_response(prompt)
         return stand_alone_query
     
-    def get_answer(self, query: str, docs: List[dict]):
+    def get_answer(self, query: str, docs: List[Dict]):
         prompt = self.chat_template.get_prompt({"query": query, "context": "\n\n".join([doc["content"] for doc in docs])})
         answer = self.llm.get_response(prompt)
         return answer

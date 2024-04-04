@@ -20,7 +20,7 @@ class TextFileLoader:
                     {
                         "content": f.read(),
                         "metadata": {
-                            "source": os.path.basename(file),
+                            "source": file,
                             "page_count": 1,
                             "creation_date": None
                         }

@@ -1,13 +1,14 @@
 import torch
 import torch.nn.functional as F
-from transformers import AutoTokenizer, AutoModel
-from ..templates import BaseTemplate
+from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
+from code.templates import BaseTemplate
 from typing import List, Dict, Union
 from torch import Tensor
 import requests
 
 DEFAULT_TASK = """Given a query, retrieve relevant documents that answer the query."""
 DEFAULT_MODEL = "Salesforce/SFR-Embedding-Mistral"
+
 
 def download_model(url, model_dir="/content/Models", model_name="model.gguf"):
     # TO-DO: Implement github repository copy    
@@ -26,12 +27,26 @@ def last_token_pool(
     return last_hidden_states[torch.arange(batch_size, device=last_hidden_states.device), sequence_lengths]
 
 class EmbeddingModel():
-    def __init__(self, model_dir:str = None, max_length=4096, device:str="cuda"):
+    def __init__(self, model_dir:str = None, max_length=4096, device:str="auto", bnb_config=None):
         if model_dir is None:
             print("No model directory provided. Using Salesforce's Mistral model.")
             model_dir = DEFAULT_MODEL
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.bfloat16
+            )
         self.tokenizer=AutoTokenizer.from_pretrained(model_dir)
-        self.model=AutoModel.from_pretrained(model_dir, resume_download=True).to(device)
+            
+        self.model=AutoModel.from_pretrained(
+            model_dir,
+            trust_remote_code=True,
+            device_map=device,
+            torch_dtype=torch.bfloat16,
+            quantization_config=bnb_config,
+            resume_download=True
+        )
         self.max_length=max_length-1
 
     def get_embedding(self, texts:List[str], **kwargs):
@@ -50,7 +65,8 @@ class EmbeddingModel():
             truncation=kwargs.get("truncation", True),
             return_tensors=kwargs.get("return_tensors", "pt")
         )
-        outputs = self.model(**batch_dict)
+        with torch.no_grad():
+            outputs = self.model(**batch_dict)
         embeddings = last_token_pool(outputs.last_hidden_state, batch_dict['attention_mask'])
         embeddings = F.normalize(embeddings, p=2, dim=1)
         return embeddings.tolist()
