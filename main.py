@@ -126,7 +126,7 @@ query_embedder = code.embeddings.MistralEmbeddings(
     model_url="model-url-goes-here"
 )
 
-retriever = code.agents.Retriever(
+retriever = code.Retriever(
     vector_database=db,
     embedding_model=query_embedder
 )

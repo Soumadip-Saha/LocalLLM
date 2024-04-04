@@ -2,7 +2,7 @@ import requests
 from elasticsearch import Elasticsearch
 import code
 from elasticsearch.helpers import bulk
-from typing import List
+from typing import List, Dict
 
 DEFAULT_INDEX_MAPPING = "code\\vector_database\INDEX.json"
 
@@ -37,6 +37,22 @@ class VectorDatabase:
         else:
             return info
     
+    def add_documents(
+        self, documents: List[Dict], embedding_model: code.embeddings.MistralEmbeddings, batch_size: int = 10
+    ):
+        inserted_docs = 0
+        for idx in range(0, len(documents), batch_size):
+            batch = documents[idx:idx+batch_size]
+            embeddings = embedding_model.get_embeddings([doc["content"] for doc in batch])["embeddings"]
+            for doc, embedding in zip(batch, embeddings):
+                doc["embedding"] = embedding
+            if self.bulk_insert(batch) == True:
+                inserted_docs += len(batch)
+            else:
+                print("Error inserting documents.")
+        print(f"Inserted {inserted_docs} documents.")
+        return "Done"
+        
     def similarity_search(self, query_vector: List[float], top_k=5):
         script_query = {
             "script_score": {
