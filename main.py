@@ -95,17 +95,28 @@
 #     main()
 
 import code
+import warnings
+warnings.filterwarnings("ignore")
+
+# CHAT_TEMPLATE = """<s> [INST] \
+#     You are an AI assistant. You will be given some contexts with a chat history and a question. \
+#     Your task is to answer the question based on the context and the chat history. You are not supposed to answer \
+#     the question out of context or chat history. If you are unable to answer the question, you can say \
+#     "Sorry, I don't know the answer. Please rephrase the question." \
+#     \n\n Context: {context}\nChat History: {chat_history}\nQuestion: \n {question} [/INST]\
+#     \n Answer: </s>\
+#     """
 
 CHAT_TEMPLATE = """<s> [INST] \
-    You are an AI assistant. You will be given some contexts with a chat history and a question. \
-    Your task is to answer the question based on the context and the chat history. You are not supposed to answer \
-    the question out of context or chat history. If you are unable to answer the question, you can say \
+    You are an AI assistant. You will be given some contexts and a question. \
+    Your task is to answer the question based on the context only. You are not supposed to answer \
+    the question out of context. If you are unable to answer the question, you can say \
     "Sorry, I don't know the answer. Please rephrase the question." \
-    \n\n Context: {context}\nChat History: {chat_history}\nQuestion: \n {question} [/INST]\
+    \n\n Context: {context}\nQuestion: \n {question} [/INST]\
     \n Answer: </s>\
     """
 
-chat_template = code.templates.BaseTemplate(CHAT_TEMPLATE, ["context", "chat_history", "question"])
+chat_template = code.templates.BaseTemplate(CHAT_TEMPLATE, ["context", "question"])
 
 QUESTION_GENERATOR = """<s> [INST] \
     You are given a chat history and a question. Your task is to generate a stand-alone \
@@ -115,24 +126,25 @@ QUESTION_GENERATOR = """<s> [INST] \
     """
 question_generator = code.templates.BaseTemplate(QUESTION_GENERATOR, ["chat_history", "question"])
 
+query_template = code.templates.BaseTemplate("Instruct: Given a query, retrieve relevant documents that answer the query.\nQuery: {query}", ["query"])
+
 db = code.vector_database.VectorDatabase(
-    host="host-goes-here",
-    index_name="index-name-goes-here",
-    user_name="user-name-goes-here",
-    password="password-goes-here"
+    host="https://54.174.178.103:4100",
+    index_name="mcube_genai_v1",
+    user_name="elastic",
+    password="zDP1wbqb3LBcxh1D=KGt"
 )
 
-query_embedder = code.embeddings.MistralEmbeddings(
-    model_url="model-url-goes-here"
-)
+embedding_model = code.embeddings.MistralEmbeddings("http://54.174.178.103:4000/create_embeddings")
 
 retriever = code.Retriever(
     vector_database=db,
-    embedding_model=query_embedder
+    embedding_model=embedding_model,
+    query_template=query_template
 )
 
 llm = code.llms.Mixtral(
-    model_url="model-url-goes-here"
+    model_url="http://54.174.178.103:4000/generate_text"
 )
 
 chat_agent = code.agents.RAGChatAgent(
@@ -145,5 +157,17 @@ chat_agent = code.agents.RAGChatAgent(
 if __name__ == "__main__":
     while True:
         query = input("Enter a query: ")
+
         response = chat_agent.generate(query)
-        print(response)
+        print(response, end="\n----------------------------------\n")
+
+
+
+
+# loader = code.loaders.TextFileLoader("D:\Files\LocalLLM\demo_documents", is_folder=True)
+# docs = loader.load()
+
+# spliter = code.splitters.RecursiveCharacterTextSplitter(1500, 500, len)
+# chunks = spliter.split_documents(docs)
+
+# db.add_documents(chunks, embedding_model) 

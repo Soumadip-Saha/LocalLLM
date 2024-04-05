@@ -71,6 +71,6 @@ class Mixtral:
     def __init__(self, model_url: str):
         self.model_url = model_url
     
-    def get_response(self, prompt: str):
-        response = requests.post(self.model_url, json={"prompt": prompt})
+    def get_response(self, prompt: str, temperature: Optional[float] = 0.01, max_tokens: Optional[int] = 1000):
+        response = requests.post(self.model_url, json={"prompt": prompt, "temperature": temperature, "max_tokens": max_tokens})
         return response.json()["answer"]

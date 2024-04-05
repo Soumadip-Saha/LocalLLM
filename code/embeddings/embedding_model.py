@@ -75,5 +75,5 @@ class MistralEmbeddings():
         self.model_url = model_url
     
     def get_embeddings(self, texts: Union[str, List[str]]):
-        embeddings = requests.post(self.model_url, json={"text": prompts})
+        embeddings = requests.post(self.model_url, json={"text": texts})
         return embeddings.json()

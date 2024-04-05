@@ -27,16 +27,19 @@ class RAGChatAgent:
         stand_alone_query = self.llm.get_response(prompt)
         return stand_alone_query
     
-    def get_answer(self, query: str, docs: List[Dict]):
-        prompt = self.chat_template.get_prompt({"query": query, "context": "\n\n".join([doc["content"] for doc in docs])})
+    def get_answer(self, query: str, docs: List[Dict], **kwargs):
+        prompt = self.chat_template.get_prompt({"question": query, "context": "\n\n".join([doc["content"] for doc in docs])})
         answer = self.llm.get_response(prompt)
         return answer
 
     def generate(self, query):
         self.messages.append({"role": "user", "message": query})
-        chat_history = get_chat_history(self.messages)
+        chat_history = get_chat_history(self.messages[-11:])
         stand_alone_query = self.get_standalone_query(query, chat_history)
+        print("Stand-alone Query: ", stand_alone_query, end="\n\n")
         docs = self.retriever.get_docs(stand_alone_query)
+        retrieved_docs = "\n".join([doc["content"] for doc in docs])
+        print(f"Retrieved Documents: {retrieved_docs}\n\n")
         answer = self.get_answer(query, docs)
         self.messages.append({"role": "assistant", "message": answer})
         return answer
