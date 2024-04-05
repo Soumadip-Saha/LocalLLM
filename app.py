@@ -76,7 +76,7 @@ async def generate_mcube_ans(user_input: UserInput):
         chat_agent.messages.append({"role": "assistant", "message": message["answer"]})
     answer = chat_agent.generate(user_input.query)
     chat_agent.messages = []
-    return {"answer": answer, "userId": user_input.userId, "query": user_input.query}
+    return {"answer": answer, "userId": user_input.userId, "query": user_input.query, "references": []}
 
 if __name__ == "__main__":
     nest_asyncio.apply()
